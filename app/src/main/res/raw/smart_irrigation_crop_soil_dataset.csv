@@ -1,0 +1,61 @@
+crop_name,category,soil_type,base_water_mm_per_season,adjusted_water_mm_per_season,irrigation_frequency_multiplier,source
+Rice,Field,Sandy,1250,1062.5,1.3,TNAU + FAO derived
+Rice,Field,Loamy,1250,1250.0,1.0,TNAU + FAO derived
+Rice,Field,Clayey,1250,1437.5,0.8,TNAU + FAO derived
+Rice,Field,Red soil,1250,1187.5,1.1,TNAU + FAO derived
+Rice,Field,Black soil,1250,1500.0,0.75,TNAU + FAO derived
+Rice,Field,Alluvial soil,1250,1250.0,1.0,TNAU + FAO derived
+Sugarcane,Field,Sandy,2200,1870.0,1.3,TNAU + FAO derived
+Sugarcane,Field,Loamy,2200,2200.0,1.0,TNAU + FAO derived
+Sugarcane,Field,Clayey,2200,2530.0,0.8,TNAU + FAO derived
+Sugarcane,Field,Red soil,2200,2090.0,1.1,TNAU + FAO derived
+Sugarcane,Field,Black soil,2200,2640.0,0.75,TNAU + FAO derived
+Sugarcane,Field,Alluvial soil,2200,2200.0,1.0,TNAU + FAO derived
+Groundnut,Field,Sandy,510,433.5,1.3,TNAU + FAO derived
+Groundnut,Field,Loamy,510,510.0,1.0,TNAU + FAO derived
+Groundnut,Field,Clayey,510,586.5,0.8,TNAU + FAO derived
+Groundnut,Field,Red soil,510,484.5,1.1,TNAU + FAO derived
+Groundnut,Field,Black soil,510,612.0,0.75,TNAU + FAO derived
+Groundnut,Field,Alluvial soil,510,510.0,1.0,TNAU + FAO derived
+Sorghum,Field,Sandy,500,425.0,1.3,TNAU + FAO derived
+Sorghum,Field,Loamy,500,500.0,1.0,TNAU + FAO derived
+Sorghum,Field,Clayey,500,575.0,0.8,TNAU + FAO derived
+Sorghum,Field,Red soil,500,475.0,1.1,TNAU + FAO derived
+Sorghum,Field,Black soil,500,600.0,0.75,TNAU + FAO derived
+Sorghum,Field,Alluvial soil,500,500.0,1.0,TNAU + FAO derived
+Maize,Field,Sandy,500,425.0,1.3,TNAU + FAO derived
+Maize,Field,Loamy,500,500.0,1.0,TNAU + FAO derived
+Maize,Field,Clayey,500,575.0,0.8,TNAU + FAO derived
+Maize,Field,Red soil,500,475.0,1.1,TNAU + FAO derived
+Maize,Field,Black soil,500,600.0,0.75,TNAU + FAO derived
+Maize,Field,Alluvial soil,500,500.0,1.0,TNAU + FAO derived
+Ragi,Field,Sandy,310,263.5,1.3,TNAU + FAO derived
+Ragi,Field,Loamy,310,310.0,1.0,TNAU + FAO derived
+Ragi,Field,Clayey,310,356.5,0.8,TNAU + FAO derived
+Ragi,Field,Red soil,310,294.5,1.1,TNAU + FAO derived
+Ragi,Field,Black soil,310,372.0,0.75,TNAU + FAO derived
+Ragi,Field,Alluvial soil,310,310.0,1.0,TNAU + FAO derived
+Cotton,Field,Sandy,600,510.0,1.3,TNAU + FAO derived
+Cotton,Field,Loamy,600,600.0,1.0,TNAU + FAO derived
+Cotton,Field,Clayey,600,690.0,0.8,TNAU + FAO derived
+Cotton,Field,Red soil,600,570.0,1.1,TNAU + FAO derived
+Cotton,Field,Black soil,600,720.0,0.75,TNAU + FAO derived
+Cotton,Field,Alluvial soil,600,600.0,1.0,TNAU + FAO derived
+Tomato,Horticulture,Sandy,700,595.0,1.3,TNAU + FAO derived
+Tomato,Horticulture,Loamy,700,700.0,1.0,TNAU + FAO derived
+Tomato,Horticulture,Clayey,700,805.0,0.8,TNAU + FAO derived
+Tomato,Horticulture,Red soil,700,665.0,1.1,TNAU + FAO derived
+Tomato,Horticulture,Black soil,700,840.0,0.75,TNAU + FAO derived
+Tomato,Horticulture,Alluvial soil,700,700.0,1.0,TNAU + FAO derived
+Potato,Horticulture,Sandy,600,510.0,1.3,TNAU + FAO derived
+Potato,Horticulture,Loamy,600,600.0,1.0,TNAU + FAO derived
+Potato,Horticulture,Clayey,600,690.0,0.8,TNAU + FAO derived
+Potato,Horticulture,Red soil,600,570.0,1.1,TNAU + FAO derived
+Potato,Horticulture,Black soil,600,720.0,0.75,TNAU + FAO derived
+Potato,Horticulture,Alluvial soil,600,600.0,1.0,TNAU + FAO derived
+Banana,Horticulture,Sandy,1700,1445.0,1.3,TNAU + FAO derived
+Banana,Horticulture,Loamy,1700,1700.0,1.0,TNAU + FAO derived
+Banana,Horticulture,Clayey,1700,1955.0,0.8,TNAU + FAO derived
+Banana,Horticulture,Red soil,1700,1615.0,1.1,TNAU + FAO derived
+Banana,Horticulture,Black soil,1700,2040.0,0.75,TNAU + FAO derived
+Banana,Horticulture,Alluvial soil,1700,1700.0,1.0,TNAU + FAO derived
