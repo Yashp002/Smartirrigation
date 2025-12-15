@@ -3,25 +3,32 @@ package com.example.smartirrigation.viewmodel
 import android.app.Application
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.smartirrigation.model.CropData
 import com.example.smartirrigation.model.IrrigationInput
 import com.example.smartirrigation.model.IrrigationRecommendation
 import com.example.smartirrigation.repository.CropRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class IrrigationViewModel(application: Application) : AndroidViewModel(application) {
-    
-    private val repository = CropRepository(application)
+@HiltViewModel
+
+class IrrigationViewModel @Inject constructor(
+    private val repository: CropRepository
+) : ViewModel() {
     
     // UI State
     private val _uiState = MutableStateFlow<IrrigationUiState>(IrrigationUiState.Loading)
     val uiState: StateFlow<IrrigationUiState> = _uiState
     
     // Input state
+    private val _selectedCategory = mutableStateOf("")
+    val selectedCategory: State<String> = _selectedCategory
+    
     private val _selectedCrop = mutableStateOf("")
     val selectedCrop: State<String> = _selectedCrop
     
@@ -40,16 +47,34 @@ class IrrigationViewModel(application: Application) : AndroidViewModel(applicati
             // Simulate data loading
             kotlinx.coroutines.delay(500) // Small delay to show loading state
             
-            // Get unique values for dropdowns
-            val crops = repository.uniqueCrops
+            // Get values for dropdowns
+            val categories = repository.cropsByCategory.keys.toList().sorted()
             val soilTypes = repository.uniqueSoilTypes
             
-            if (crops.isNotEmpty() && soilTypes.isNotEmpty()) {
+            if (categories.isNotEmpty() && soilTypes.isNotEmpty()) {
+                // Set default values
+                val defaultCategory = if (categories.contains("Houseplant")) "Houseplant" else categories.first()
+                val defaultCrop = repository.defaultCrop
+                val defaultSoilType = repository.defaultSoilType
+                
+                // Get crops for the default category
+                val cropsForCategory = repository.getCropsForCategory(defaultCategory)
+                
+                // Set initial selections
+                _selectedCategory.value = defaultCategory
+                _selectedCrop.value = defaultCrop
+                _selectedSoilType.value = defaultSoilType
+                
                 _uiState.value = IrrigationUiState.Success(
-                    crops = crops,
+                    categories = categories,
+                    crops = cropsForCategory,
                     soilTypes = soilTypes,
-                    recommendation = null
+                    recommendation = null,
+                    currentCropData = repository.getCropData(defaultCrop, defaultSoilType)
                 )
+                
+                // Trigger initial recommendation
+                updateRecommendation()
             } else {
                 _uiState.value = IrrigationUiState.Error("Failed to load crop data")
             }
@@ -108,6 +133,7 @@ sealed class IrrigationUiState {
     object Loading : IrrigationUiState()
     data class Error(val message: String) : IrrigationUiState()
     data class Success(
+        val categories: List<String>,
         val crops: List<String>,
         val soilTypes: List<String>,
         val recommendation: IrrigationRecommendation?,

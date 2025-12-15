@@ -20,12 +20,28 @@ class CropRepository(private val context: Context) {
     val uniqueCrops: List<String>
         get() = _cropData.map { it.cropName }.distinct().sorted()
     
+    // Get crops grouped by category
+    val cropsByCategory: Map<String, List<CropData>>
+        get() = _cropData.groupBy { it.category }
+    
     // Get unique soil types for dropdown
     val uniqueSoilTypes: List<String>
         get() = _cropData.map { it.soilType }.distinct().sorted()
     
+    // Get default crop and soil type (Money Plant with General Gardening Soil)
+    val defaultCrop: String = "Money Plant"
+    val defaultSoilType: String = "General Gardening Soil"
+    
     init {
         loadCsvData()
+        
+        // Verify default values exist
+        val defaultCropData = getCropData(defaultCrop, defaultSoilType)
+        if (defaultCropData == null) {
+            Log.w("CropRepository", "Default crop data not found: $defaultCrop with $defaultSoilType")
+        } else {
+            Log.d("CropRepository", "Default crop data loaded: ${defaultCropData.cropName} with ${defaultCropData.soilType}")
+        }
     }
     
     private fun loadCsvData() {
@@ -62,6 +78,14 @@ class CropRepository(private val context: Context) {
     
     fun getCropData(cropName: String, soilType: String): CropData? {
         return _cropData.find { it.cropName == cropName && it.soilType == soilType }
+    }
+    
+    fun getCropsForCategory(category: String): List<String> {
+        return _cropData
+            .filter { it.category == category }
+            .map { it.cropName }
+            .distinct()
+            .sorted()
     }
     
     // Calculate irrigation recommendation based on crop data and soil moisture

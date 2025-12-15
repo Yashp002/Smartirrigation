@@ -3,48 +3,22 @@ package com.example.smartirrigation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.smartirrigation.ui.theme.SmartIrrigationTheme
 import com.example.smartirrigation.viewmodel.IrrigationUiState
 import com.example.smartirrigation.viewmodel.IrrigationViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,54 +37,58 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun SmartIrrigationApp(
-    viewModel: IrrigationViewModel = viewModel(
-        factory = createViewModelFactory()
-    )
+    viewModel: IrrigationViewModel = viewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val selectedCrop by viewModel.selectedCrop.collectAsStateWithLifecycle()
+    val selectedSoilType by viewModel.selectedSoilType.collectAsStateWithLifecycle()
+    val soilMoisture by viewModel.soilMoisture.collectAsStateWithLifecycle()
+    val selectedCategory by viewModel.selectedCategory.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
-            SmartIrrigationTopBar()
+            TopAppBar(
+                title = { Text("Smart Irrigation") }
+            )
         }
     ) { padding ->
         when (val state = uiState) {
             is IrrigationUiState.Loading -> {
-                LoadingScreen(modifier = Modifier.padding(padding))
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-
             is IrrigationUiState.Error -> {
-                ErrorScreen(
-                    message = state.message,
-                    modifier = Modifier.padding(padding)
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
-
             is IrrigationUiState.Success -> {
                 MainContent(
                     state = state,
-                    onCropSelected = viewModel::onCropSelected,
-                    onSoilTypeSelected = viewModel::onSoilTypeSelected,
-                    onSoilMoistureChanged = viewModel::onSoilMoistureChanged,
+                    selectedCategory = selectedCategory,
+                    selectedCrop = selectedCrop,
+                    selectedSoilType = selectedSoilType,
+                    soilMoisture = soilMoisture,
+                    onCategorySelected = { viewModel.onCategorySelected(it) },
+                    onCropSelected = { viewModel.onCropSelected(it) },
+                    onSoilTypeSelected = { viewModel.onSoilTypeSelected(it) },
+                    onSoilMoistureChanged = { viewModel.onSoilMoistureChanged(it) },
                     modifier = Modifier.padding(padding)
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun createViewModelFactory(): ViewModelProvider.Factory {
-    val context = LocalContext.current
-    return object : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return if (modelClass.isAssignableFrom(IrrigationViewModel::class.java)) {
-                IrrigationViewModel(
-                    context.applicationContext as android.app.Application
-                ) as T
-            } else {
-                throw IllegalArgumentException("Unknown ViewModel class")
             }
         }
     }
@@ -118,51 +96,21 @@ private fun createViewModelFactory(): ViewModelProvider.Factory {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SmartIrrigationTopBar() {
-    TopAppBar(
-        title = { Text("Smart Irrigation") },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        )
-    )
-}
-
-@Composable
-private fun LoadingScreen(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-private fun ErrorScreen(message: String, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Error: $message",
-            color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
 private fun MainContent(
     state: IrrigationUiState.Success,
+    selectedCategory: String,
+    selectedCrop: String,
+    selectedSoilType: String,
+    soilMoisture: Float,
+    onCategorySelected: (String) -> Unit,
     onCropSelected: (String) -> Unit,
     onSoilTypeSelected: (String) -> Unit,
     onSoilMoistureChanged: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var currentSoilMoisture by remember { mutableStateOf(50f) }
+    var expandedCategory by remember { mutableStateOf(false) }
+    var expandedCrop by remember { mutableStateOf(false) }
+    var expandedSoilType by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -170,271 +118,162 @@ private fun MainContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        CropDropdown(
-            crops = state.crops,
-            selectedCrop = state.currentCropData?.cropName,
-            onCropSelected = onCropSelected
-        )
-
-        SoilTypeDropdown(
-            soilTypes = state.soilTypes,
-            selectedSoilType = state.currentCropData?.soilType,
-            onSoilTypeSelected = onSoilTypeSelected
-        )
-
-        SoilMoistureCard(
-            currentSoilMoisture = currentSoilMoisture,
-            onSoilMoistureChanged = { newValue ->
-                currentSoilMoisture = newValue
-                onSoilMoistureChanged(newValue)
-            }
-        )
-
-        RecommendationCard(
-            recommendation = state.recommendation,
-            currentCropData = state.currentCropData
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        FooterText()
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CropDropdown(
-    crops: List<String>,
-    selectedCrop: String?,
-    onCropSelected: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it }
-    ) {
-        TextField(
-            value = selectedCrop ?: "Select a crop",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Select Crop") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
+        // Category Dropdown
+        ExposedDropdownMenuBox(
+            expanded = expandedCategory,
+            onExpandedChange = { expandedCategory = it }
         ) {
-            crops.forEach { crop ->
-                DropdownMenuItem(
-                    text = { Text(crop) },
-                    onClick = {
-                        onCropSelected(crop)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SoilTypeDropdown(
-    soilTypes: List<String>,
-    selectedSoilType: String?,
-    onSoilTypeSelected: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it }
-    ) {
-        TextField(
-            value = selectedSoilType ?: "Select soil type",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Select Soil Type") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            soilTypes.forEach { soilType ->
-                DropdownMenuItem(
-                    text = { Text(soilType) },
-                    onClick = {
-                        onSoilTypeSelected(soilType)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SoilMoistureCard(
-    currentSoilMoisture: Float,
-    onSoilMoistureChanged: (Float) -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "Current Soil Moisture: ${currentSoilMoisture.toInt()}%",
-                style = MaterialTheme.typography.titleMedium
+            TextField(
+                value = selectedCategory,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Select Category") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategory)
+                },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
             )
 
-            Slider(
-                value = currentSoilMoisture,
-                onValueChange = onSoilMoistureChanged,
-                valueRange = 0f..100f,
-                steps = 10,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            ExposedDropdownMenu(
+                expanded = expandedCategory,
+                onDismissRequest = { expandedCategory = false }
             ) {
-                Text("0%")
-                Text("50%")
-                Text("100%")
+                state.categories.forEach { category ->
+                    DropdownMenuItem(
+                        text = { Text(category) },
+                        onClick = {
+                            onCategorySelected(category)
+                            expandedCategory = false
+                        }
+                    )
+                }
             }
         }
-    }
-}
 
-@Composable
-private fun RecommendationCard(
-    recommendation: Any?,
-    currentCropData: Any?
-) {
-    if (recommendation != null) {
-        val needsIrrigation = getPropertyValue(recommendation, "needsIrrigation") as? Boolean ?: false
+        // Crop Dropdown
+        ExposedDropdownMenuBox(
+            expanded = expandedCrop,
+            onExpandedChange = { expandedCrop = it }
+        ) {
+            TextField(
+                value = selectedCrop,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Select Crop/Plant") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCrop)
+                },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+            )
 
-        val cardColor = if (needsIrrigation) {
-            MaterialTheme.colorScheme.tertiaryContainer
-        } else {
-            MaterialTheme.colorScheme.secondaryContainer
+            ExposedDropdownMenu(
+                expanded = expandedCrop,
+                onDismissRequest = { expandedCrop = false }
+            ) {
+                state.crops.forEach { crop ->
+                    DropdownMenuItem(
+                        text = { Text(crop) },
+                        onClick = {
+                            onCropSelected(crop)
+                            expandedCrop = false
+                        }
+                    )
+                }
+            }
         }
 
+        // Soil Type Dropdown
+        ExposedDropdownMenuBox(
+            expanded = expandedSoilType,
+            onExpandedChange = { expandedSoilType = it }
+        ) {
+            TextField(
+                value = selectedSoilType,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Select Soil Type") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedSoilType)
+                },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expandedSoilType,
+                onDismissRequest = { expandedSoilType = false }
+            ) {
+                state.soilTypes.forEach { soilType ->
+                    DropdownMenuItem(
+                        text = { Text(soilType) },
+                        onClick = {
+                            onSoilTypeSelected(soilType)
+                            expandedSoilType = false
+                        }
+                    )
+                }
+            }
+        }
+
+        // Soil Moisture Input
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = cardColor)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = if (needsIrrigation) {
-                        "Irrigation Recommended ✅"
-                    } else {
-                        "No Irrigation Needed ✋"
-                    },
-                    style = MaterialTheme.typography.headlineSmall
+                    text = "Current Soil Moisture: ${soilMoisture.toInt()}%",
+                    style = MaterialTheme.typography.titleMedium
                 )
+                Slider(
+                    value = soilMoisture,
+                    onValueChange = onSoilMoistureChanged,
+                    valueRange = 0f..100f,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
 
-                if (needsIrrigation) {
-                    val waterMm = getPropertyValue(recommendation, "recommendedWaterMm") as? Number
-                    val duration = getPropertyValue(recommendation, "irrigationDurationMinutes") as? Number
-
-                    waterMm?.let {
-                        Text(
-                            text = "Water needed: ${"%.1f".format(it.toDouble())} mm",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-
-                    duration?.let {
-                        Text(
-                            text = "Irrigate for: ${it.toInt()} minutes",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                } else {
+        // Water Requirements Display
+        if (selectedCrop.isNotEmpty() && selectedSoilType.isNotEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Text(
-                        text = "Soil moisture is optimal. No irrigation needed at this time.",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-
-                currentCropData?.let { cropData ->
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                    Text(
-                        text = "Crop Info",
-                        style = MaterialTheme.typography.titleMedium
+                        text = "Irrigation Recommendations",
+                        style = MaterialTheme.typography.titleLarge
                     )
 
-                    val category = getPropertyValue(cropData, "category")
-                    val baseWater = getPropertyValue(cropData, "baseWaterMmPerSeason")
-                    val adjustedWater = getPropertyValue(cropData, "adjustedWaterMmPerSeason")
-
-                    category?.let { Text("Category: $it") }
-                    baseWater?.let { Text("Base Water Need: $it mm/season") }
-                    adjustedWater?.let { Text("Adjusted Water Need: $it mm/season") }
+                    state.selectedCropData?.let { cropData ->
+                        Text(
+                            text = "Base Water: ${cropData.baseWaterMmPerSeason} mm/season",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "Adjusted Water: ${cropData.adjustedWaterMmPerSeason} mm/season",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "Irrigation Frequency: ${cropData.irrigationFrequencyMultiplier}x",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
         }
-    } else {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-        ) {
-            Text(
-                text = "Select a crop and soil type to get irrigation recommendations",
-                modifier = Modifier.padding(16.dp),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-    }
-}
-
-@Composable
-private fun FooterText() {
-    Text(
-        text = "Smart Irrigation System\nPowered by Solar IoT",
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    )
-}
-
-private fun getPropertyValue(obj: Any, propertyName: String): Any? {
-    return try {
-        obj.javaClass.getDeclaredField(propertyName).apply {
-            isAccessible = true
-        }.get(obj)
-    } catch (e: Exception) {
-        null
     }
 }

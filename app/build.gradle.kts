@@ -68,6 +68,11 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    
+    // Allow references to generated code
+    kapt {
+        correctErrorTypes = true
+    }
 }
 
 dependencies {
@@ -75,6 +80,11 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
+    
+    // Hilt for dependency injection
+    implementation("com.google.dagger:hilt-android:2.50")
+    kapt("com.google.dagger:hilt-android-compiler:2.50")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     
     // Compose
     val composeBom = platform("androidx.compose:compose-bom:2023.10.01")
@@ -92,23 +102,19 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     // Integration with ViewModels
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
     
-    // Hilt for dependency injection
-    implementation("com.google.dagger:hilt-android:2.50")
-    kapt("com.google.dagger:hilt-android-compiler:2.50")
-    kapt("androidx.hilt:hilt-compiler:1.1.0")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     
     // Desugar JDK
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     
     // CSV parsing
     implementation("com.opencsv:opencsv:5.5.2")
-    implementation("com.google.android.material:material:1.11.0")
     
     // Testing
     testImplementation("junit:junit:4.13.2")
